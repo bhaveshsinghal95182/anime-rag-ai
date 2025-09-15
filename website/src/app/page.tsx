@@ -31,7 +31,7 @@ import { Actions, Action } from "@/components/ai-elements/actions";
 import { Fragment, useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import { Response } from "@/components/ai-elements/response";
-import { GlobeIcon, RefreshCcwIcon, CopyIcon } from "lucide-react";
+import { RefreshCcwIcon, CopyIcon } from "lucide-react";
 import {
   Source,
   Sources,
@@ -44,6 +44,7 @@ import {
   ReasoningTrigger,
 } from "@/components/ai-elements/reasoning";
 import { Loader } from "@/components/ai-elements/loader";
+import { Button } from "@/components/ui/button";
 
 const models = [
   {
@@ -93,7 +94,7 @@ const ChatBotDemo = () => {
 
     return (
       <div className="space-y-2">
-        <div className="text-sm text-gray-600 mb-3">
+        <div className="text-sm text-muted-foreground mb-3">
           Page {currentPage} of {totalPages} (Showing {startIndex + 1}-{Math.min(endIndex, results.length)} of {results.length} results)
         </div>
         {visibleResults.map((anime: unknown, idx: number) => {
@@ -113,65 +114,61 @@ const ChatBotDemo = () => {
           };
           
           return (
-            <div key={idx} className="bg-white p-3 rounded border">
-              <div className="font-semibold">{animeData.title}</div>
+            <div key={idx} className="bg-background p-3 rounded-md border shadow-sm">
+              <div className="font-semibold text-foreground">{animeData.title}</div>
               {animeData.englishTitle && animeData.englishTitle !== animeData.title && (
-                <div className="text-sm text-gray-600">{animeData.englishTitle}</div>
+                <div className="text-sm text-muted-foreground">{animeData.englishTitle}</div>
               )}
-              <div className="flex gap-4 text-sm text-gray-700 mt-1">
-                {animeData.score && <span>⭐ {animeData.score}</span>}
-                {animeData.episodes && <span>📺 {animeData.episodes} eps</span>}
-                {animeData.type && <span>📱 {animeData.type}</span>}
-                {animeData.year && <span>📅 {animeData.year}</span>}
-                {animeData.rank && <span>🏆 #{animeData.rank}</span>}
+              <div className="flex gap-4 text-sm text-muted-foreground mt-1">
+                {animeData.score && <span>{animeData.score}</span>}
+                {animeData.episodes && <span>{animeData.episodes} eps</span>}
+                {animeData.type && <span>{animeData.type}</span>}
+                {animeData.year && <span>{animeData.year}</span>}
+                {animeData.rank && <span>#{animeData.rank}</span>}
               </div>
               {animeData.genres && (
-                <div className="text-xs text-blue-600 mt-1">{animeData.genres}</div>
+                <div className="text-xs text-muted-foreground/80 mt-1">{animeData.genres}</div>
               )}
               {animeData.studios && (
-                <div className="text-xs text-purple-600 mt-1">Studio: {animeData.studios}</div>
+                <div className="text-xs text-muted-foreground/80 mt-1">Studio: {animeData.studios}</div>
               )}
               {animeData.description && (
-                <div className="text-xs text-gray-600 mt-2">{animeData.description}</div>
+                <div className="text-xs text-muted-foreground mt-2">{animeData.description}</div>
               )}
             </div>
           );
         })}
         
         {totalPages > 1 && (
-          <div className="flex items-center justify-between mt-4 p-3 bg-gray-50 rounded-lg">
-            <button
-              onClick={prevPage}
-              disabled={currentPage === 1}
-              className="px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors"
-            >
+          <div className="flex items-center justify-between mt-4 p-3 bg-muted rounded-lg">
+            <Button onClick={prevPage} disabled={currentPage === 1} className="px-4 py-2">
               ← Previous
-            </button>
+            </Button>
             
             <div className="flex items-center space-x-2">
               {/* Show page numbers with ellipsis for large page counts */}
               {totalPages <= 7 ? (
                 // Show all pages if 7 or fewer
                 Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <button
+                  <Button
                     key={page}
                     onClick={() => goToPage(page)}
                     className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
                       page === currentPage
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-white text-gray-700 hover:bg-gray-100 border'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-card text-muted-foreground hover:bg-secondary'
                     }`}
                   >
                     {page}
-                  </button>
+                  </Button>
                 ))
               ) : (
                 // Show condensed pagination for many pages
                 <>
                   {currentPage > 3 && (
                     <>
-                      <button onClick={() => goToPage(1)} className="px-3 py-1 rounded text-sm font-medium bg-white text-gray-700 hover:bg-gray-100 border">1</button>
-                      {currentPage > 4 && <span className="text-gray-500">...</span>}
+                      <Button onClick={() => goToPage(1)} className="px-3 py-1 rounded text-sm font-medium bg-card text-muted-foreground hover:bg-secondary">1</Button>
+                      {currentPage > 4 && <span className="text-muted-foreground">...</span>}
                     </>
                   )}
                   
@@ -179,42 +176,38 @@ const ChatBotDemo = () => {
                     const page = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
                     if (page > totalPages) return null;
                     return (
-                      <button
+                      <Button
                         key={page}
                         onClick={() => goToPage(page)}
                         className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
                           page === currentPage
-                            ? 'bg-blue-500 text-white'
-                            : 'bg-white text-gray-700 hover:bg-gray-100 border'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-card text-muted-foreground hover:bg-secondary'
                         }`}
                       >
                         {page}
-                      </button>
+                      </Button>
                     );
                   })}
                   
                   {currentPage < totalPages - 2 && (
                     <>
-                      {currentPage < totalPages - 3 && <span className="text-gray-500">...</span>}
-                      <button onClick={() => goToPage(totalPages)} className="px-3 py-1 rounded text-sm font-medium bg-white text-gray-700 hover:bg-gray-100 border">{totalPages}</button>
+                      {currentPage < totalPages - 3 && <span className="text-muted-foreground">...</span>}
+                      <Button onClick={() => goToPage(totalPages)} className="px-3 py-1 rounded text-sm font-medium bg-card text-muted-foreground hover:bg-secondary">{totalPages}</Button>
                     </>
                   )}
                 </>
               )}
             </div>
 
-            <button
-              onClick={nextPage}
-              disabled={currentPage === totalPages}
-              className="px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors"
-            >
+            <Button onClick={nextPage} disabled={currentPage === totalPages} className="px-4 py-2">
               Next →
-            </button>
+            </Button>
           </div>
         )}
         
         {totalPages === 1 && results.length > 0 && (
-          <div className="text-center text-sm text-gray-500 py-2">
+          <div className="text-center text-sm text-muted-foreground py-2">
             Showing all {results.length} results
           </div>
         )}
@@ -287,14 +280,14 @@ const ChatBotDemo = () => {
                           <Message from={message.role}>
                             <MessageContent>
                               {isFollowUpAfterTool && (
-                                <div className="text-xs text-blue-600 mb-2 font-medium">
-                                  💭 AI Analysis & Recommendations:
+                                <div className="text-xs text-muted-foreground mb-2 font-medium">
+                                  AI analysis & recommendations:
                                 </div>
                               )}
                               <Response>{part.text}</Response>
                             </MessageContent>
                           </Message>
-                          {message.role === "assistant" &&
+                                {message.role === "assistant" &&
                             i === message.parts.length - 1 && (
                               <Actions className="mt-2">
                                 <Action
@@ -336,25 +329,25 @@ const ChatBotDemo = () => {
                         <Fragment key={`${message.id}-${i}`}>
                           <Message from={message.role}>
                             <MessageContent>
-                              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                                <h4 className="font-semibold text-blue-800 mb-2">
-                                  {part.type === "tool-searchAnime" ? "🔍 Searching Anime" : "🎯 Filtering Anime"}
+                              <div className="bg-card border rounded-lg p-4 mb-4">
+                                <h4 className="font-semibold mb-2 text-base text-foreground">
+                                  {part.type === "tool-searchAnime" ? "Searching anime" : "Filtering anime"}
                                 </h4>
                                 {part.state === "input-streaming" && (
-                                  <div className="text-blue-600">Processing request...</div>
+                                  <div className="text-muted-foreground">Processing request...</div>
                                 )}
                                 {part.state === "input-available" && (
-                                  <div className="text-blue-600">
-                                    <pre className="text-xs bg-blue-100 p-2 rounded">
+                                  <div className="text-muted-foreground">
+                                    <pre className="text-xs bg-muted p-2 rounded">
                                       {JSON.stringify(part.input, null, 2)}
                                     </pre>
                                   </div>
                                 )}
                                 {part.state === "output-available" && (
-                                  <div className="text-green-700">
+                                  <div className="text-foreground">
                                     {typeof part.output === 'object' && part.output !== null ? (
                                       <div>
-                                        <div className="font-medium mb-2">
+                                        <div className="font-medium mb-2 text-foreground">
                                           {(part.output as { message?: string }).message}
                                         </div>
                                         {(part.output as { results?: unknown[]; totalCount?: number }).results && Array.isArray((part.output as { results?: unknown[] }).results) && (
@@ -365,16 +358,14 @@ const ChatBotDemo = () => {
                                         )}
                                       </div>
                                     ) : (
-                                      <pre className="text-xs bg-green-100 p-2 rounded overflow-auto">
+                                      <pre className="text-xs bg-muted p-2 rounded overflow-auto">
                                         {JSON.stringify(part.output, null, 2)}
                                       </pre>
                                     )}
                                   </div>
                                 )}
                                 {part.state === "output-error" && (
-                                  <div className="text-red-600">
-                                    Error: {part.errorText}
-                                  </div>
+                                  <div className="text-destructive">Error: {part.errorText}</div>
                                 )}
                               </div>
                             </MessageContent>
