@@ -1,14 +1,9 @@
 "use client";
 
 import React from "react";
+import type { ChatStatus } from "ai";
 import {
   PromptInput,
-  PromptInputActionAddAttachments,
-  PromptInputActionMenu,
-  PromptInputActionMenuContent,
-  PromptInputActionMenuTrigger,
-  PromptInputAttachments,
-  PromptInputAttachment,
   PromptInputBody,
   PromptInputModelSelect,
   PromptInputModelSelectContent,
@@ -30,7 +25,7 @@ type Props = {
   models: { name: string; value: string }[];
   model: string;
   setModel: (v: string) => void;
-  status?: any;
+  status?: ChatStatus;
 };
 
 export default function PromptInputForm({

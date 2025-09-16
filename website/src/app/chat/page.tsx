@@ -6,27 +6,7 @@ import {
   ConversationScrollButton,
 } from "@/components/ai-elements/conversation";
 import { Message, MessageContent } from "@/components/ai-elements/message";
-import {
-  PromptInput,
-  PromptInputActionAddAttachments,
-  PromptInputActionMenu,
-  PromptInputActionMenuContent,
-  PromptInputActionMenuTrigger,
-  PromptInputAttachment,
-  PromptInputAttachments,
-  PromptInputBody,
-  PromptInputButton,
-  type PromptInputMessage,
-  PromptInputModelSelect,
-  PromptInputModelSelectContent,
-  PromptInputModelSelectItem,
-  PromptInputModelSelectTrigger,
-  PromptInputModelSelectValue,
-  PromptInputSubmit,
-  PromptInputTextarea,
-  PromptInputToolbar,
-  PromptInputTools,
-} from "@/components/ai-elements/prompt-input";
+import { type PromptInputMessage } from "@/components/ai-elements/prompt-input";
 import PromptInputForm from "@/components/ai-elements/prompt-input-form";
 import { Actions, Action } from "@/components/ai-elements/actions";
 import { Fragment, useEffect, useState } from "react";

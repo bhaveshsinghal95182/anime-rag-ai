@@ -8,7 +8,9 @@ type PendingMessageStore = {
   clearPendingMessage: () => void;
 };
 
-export const usePendingMessageStore = create<PendingMessageStore>((set: any) => ({
+type SetFn<T> = (partial: Partial<T> | ((state: T) => Partial<T>)) => void;
+
+export const usePendingMessageStore = create<PendingMessageStore>((set: SetFn<PendingMessageStore>) => ({
   pendingMessage: undefined,
   pendingConsumed: false,
   setPendingMessage: (msg: string | undefined) => set(() => ({ pendingMessage: msg, pendingConsumed: false })),
