@@ -85,8 +85,8 @@ export const tools = {
       startYear: z.string().optional().describe("Earliest year to include (YYYY format)"),
       endYear: z.string().optional().describe("Latest year to include (YYYY format)"),
       
-      // Sorting and pagination
-      sortBy: z.enum(['Score', 'Popularity', 'Rank', 'Episodes', 'Title']).optional().describe("Field to sort by"),
+  // Sorting and pagination
+  sortBy: z.enum(['Score', 'Popularity', 'Rank', 'Episodes', 'Title', 'Aired']).optional().describe("Field to sort by"),
       sortDirection: z.enum(['asc', 'desc']).optional().describe("Sort direction"),
       limit: z.number().optional().describe("Maximum number of results to return (default: all results)"),
       offset: z.number().optional().describe("Number of results to skip"),
@@ -254,8 +254,8 @@ export const tools = {
       startYear: z.string().optional().describe("Earliest year to include (YYYY format)"),
       endYear: z.string().optional().describe("Latest year to include (YYYY format)"),
       
-      // Sorting and pagination
-      sortBy: z.enum(['Score', 'Popularity', 'Rank', 'Episodes', 'Title']).optional().describe("Field to sort by"),
+  // Sorting and pagination
+  sortBy: z.enum(['Score', 'Popularity', 'Rank', 'Episodes', 'Title', 'Aired']).optional().describe("Field to sort by"),
       sortDirection: z.enum(['asc', 'desc']).optional().describe("Sort direction"),
       limit: z.number().optional().describe("Maximum number of results to return"),
       
@@ -449,23 +449,66 @@ export const tools = {
           });
         }
         
+        // Helper to parse `Aired` into a comparable timestamp (ms since epoch)
+        const parseAiredToTimestamp = (aired?: string | null): number | null => {
+          if (!aired) return null;
+          // Common formats:
+          // "Apr 3, 2016 to Jun 26, 2016"
+          // "2016" or "Apr, 2016"
+          // "Jan 10, 2020"
+          // We'll try to extract the earliest year/month/day available.
+          try {
+            // If there's a range like "...to...", take the start side as the airing time
+            const parts = aired.split(/to/i).map(p => p.trim()).filter(Boolean);
+            const candidate = parts[0];
+
+            // Try parsing with Date.parse for full dates
+            const parsed = Date.parse(candidate);
+            if (!isNaN(parsed)) return parsed;
+
+            // If candidate is just a year (4 digits), create a date at Jan 1 of that year
+            const yearMatch = candidate.match(/(\d{4})/);
+            if (yearMatch) {
+              const y = parseInt(yearMatch[1], 10);
+              return new Date(y, 0, 1).getTime();
+            }
+
+            return null;
+          } catch (e) {
+            return null;
+          }
+        };
+
         // Apply sorting
         if (params.sortBy) {
           filteredData.sort((a, b) => {
+            // Special handling for Aired/time-based sorting
+            if (params.sortBy === 'Aired') {
+              const aTs = parseAiredToTimestamp(a.Aired);
+              const bTs = parseAiredToTimestamp(b.Aired);
+
+              if (aTs === null && bTs === null) return 0;
+              if (aTs === null) return params.sortDirection === 'asc' ? 1 : -1;
+              if (bTs === null) return params.sortDirection === 'asc' ? -1 : 1;
+
+              const cmp = aTs - bTs;
+              return params.sortDirection === 'asc' ? cmp : -cmp;
+            }
+
             const aVal = a[params.sortBy!] as string | number | null;
             const bVal = b[params.sortBy!] as string | number | null;
-            
+
             if (aVal === null && bVal === null) return 0;
             if (aVal === null) return params.sortDirection === 'asc' ? 1 : -1;
             if (bVal === null) return params.sortDirection === 'asc' ? -1 : 1;
-            
+
             let comparison = 0;
             if (typeof aVal === 'number' && typeof bVal === 'number') {
               comparison = aVal - bVal;
             } else {
               comparison = String(aVal).localeCompare(String(bVal));
             }
-            
+
             return params.sortDirection === 'asc' ? comparison : -comparison;
           });
         }

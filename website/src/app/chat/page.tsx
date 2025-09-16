@@ -27,8 +27,10 @@ import {
   PromptInputToolbar,
   PromptInputTools,
 } from "@/components/ai-elements/prompt-input";
+import PromptInputForm from "@/components/ai-elements/prompt-input-form";
 import { Actions, Action } from "@/components/ai-elements/actions";
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
+import { usePendingMessageStore } from "@/lib/store";
 import { useChat } from "@ai-sdk/react";
 import { Response } from "@/components/ai-elements/response";
 import { RefreshCcwIcon, CopyIcon } from "lucide-react";
@@ -58,6 +60,10 @@ const ChatBotDemo = () => {
   const [model, setModel] = useState<string>(models[0].value);
   const [toolPagination, setToolPagination] = useState<Record<string, number>>({});
   const { messages, sendMessage, status, regenerate } = useChat();
+  const pendingMessage = usePendingMessageStore((s) => s.pendingMessage);
+  const pendingConsumed = usePendingMessageStore((s) => s.pendingConsumed);
+  const consumePendingMessage = usePendingMessageStore((s) => s.consumePendingMessage);
+  const clearPendingMessage = usePendingMessageStore((s) => s.clearPendingMessage);
 
   const AnimeResultsPaginated = ({ 
     results, 
@@ -237,6 +243,17 @@ const ChatBotDemo = () => {
     setInput("");
   };
 
+  // If a pending message exists (set from main page), send it once on mount
+  useEffect(() => {
+    if (pendingMessage && !pendingConsumed) {
+      // mark consumed immediately to avoid duplicate sends in StrictMode
+      consumePendingMessage();
+      sendMessage({ text: pendingMessage }, { body: { model: model } });
+      clearPendingMessage();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingMessage, pendingConsumed]);
+
   return (
     <div className="max-w-4xl mx-auto p-6 relative size-full h-screen">
       <div className="flex flex-col h-full">
@@ -383,56 +400,16 @@ const ChatBotDemo = () => {
           <ConversationScrollButton />
         </Conversation>
 
-        <PromptInput
+        {/* Reusable prompt input form */}
+        <PromptInputForm
           onSubmit={handleSubmit}
-          className="mt-4"
-          globalDrop
-          multiple
-        >
-          <PromptInputBody>
-            <PromptInputAttachments>
-              {(attachment) => <PromptInputAttachment data={attachment} />}
-            </PromptInputAttachments>
-            <PromptInputTextarea
-              onChange={(e) => setInput(e.target.value)}
-              value={input}
-            />
-          </PromptInputBody>
-          <PromptInputToolbar>
-            <PromptInputTools>
-              <PromptInputActionMenu>
-                <PromptInputActionMenuTrigger />
-                <PromptInputActionMenuContent>
-                  <PromptInputActionAddAttachments />
-                </PromptInputActionMenuContent>
-              </PromptInputActionMenu>
-              <PromptInputModelSelect
-                onValueChange={(value) => {
-                  setModel(value);
-                }}
-                value={model}
-              >
-                <PromptInputModelSelectTrigger>
-                  <PromptInputModelSelectValue />
-                </PromptInputModelSelectTrigger>
-                <PromptInputModelSelectContent>
-                  {models.map((model) => (
-                    <PromptInputModelSelectItem
-                      key={model.value}
-                      value={model.value}
-                    >
-                      {model.name}
-                    </PromptInputModelSelectItem>
-                  ))}
-                </PromptInputModelSelectContent>
-              </PromptInputModelSelect>
-            </PromptInputTools>
-            <PromptInputSubmit
-              disabled={!input && status !== "submitted"}
-              status={status}
-            />
-          </PromptInputToolbar>
-        </PromptInput>
+          input={input}
+          setInput={setInput}
+          models={models}
+          model={model}
+          setModel={setModel}
+          status={status}
+        />
       </div>
     </div>
   );
